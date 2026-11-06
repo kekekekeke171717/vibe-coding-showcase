@@ -1,0 +1,479 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>全员 Vibe Coding · 展示系统</title>
+<style>
+  :root {
+    --bg: #f7f8fa;
+    --surface: #ffffff;
+    --ink: #1c2333;
+    --ink-2: #5a6478;
+    --line: #e5e8ef;
+    --accent: #4f46e5;
+    --accent-soft: #eef2ff;
+    --accent-2: #0ea5e9;
+    --ok: #16a34a;
+    --warn: #d97706;
+    --radius: 14px;
+    font-size: 16px;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: "PingFang SC", "Microsoft YaHei", "Segoe UI", sans-serif;
+    background: var(--bg); color: var(--ink); line-height: 1.7;
+  }
+  a { color: var(--accent); text-decoration: none; }
+
+  /* ---------- 顶部导航 ---------- */
+  nav {
+    position: sticky; top: 0; z-index: 100;
+    background: rgba(255,255,255,.88); backdrop-filter: blur(10px);
+    border-bottom: 1px solid var(--line);
+  }
+  .nav-inner {
+    max-width: 1080px; margin: 0 auto; padding: 0 24px;
+    height: 60px; display: flex; align-items: center; gap: 24px;
+  }
+  .logo { font-weight: 700; font-size: 1.05rem; color: var(--ink); }
+  .logo span { color: var(--accent); }
+  .nav-links { display: flex; gap: 20px; margin-left: auto; }
+  .nav-links a { color: var(--ink-2); font-size: .92rem; transition: color .2s; }
+  .nav-links a:hover { color: var(--accent); }
+
+  /* ---------- Hero ---------- */
+  header {
+    max-width: 1080px; margin: 0 auto; padding: 84px 24px 64px;
+    text-align: center;
+  }
+  .badge {
+    display: inline-block; padding: 5px 16px; border-radius: 999px;
+    background: var(--accent-soft); color: var(--accent);
+    font-size: .85rem; font-weight: 600; margin-bottom: 22px;
+  }
+  header h1 { font-size: 2.9rem; font-weight: 800; letter-spacing: .5px; }
+  header h1 em { font-style: normal; color: var(--accent); }
+  header p.sub {
+    margin: 18px auto 0; max-width: 640px; color: var(--ink-2); font-size: 1.08rem;
+  }
+  .hero-actions { margin-top: 34px; display: flex; gap: 14px; justify-content: center; flex-wrap: wrap; }
+  .btn {
+    padding: 11px 26px; border-radius: 10px; font-size: .95rem; font-weight: 600;
+    cursor: pointer; border: none; transition: transform .15s, box-shadow .15s;
+  }
+  .btn-primary { background: var(--accent); color: #fff; box-shadow: 0 6px 18px rgba(79,70,229,.28); }
+  .btn-primary:hover { transform: translateY(-2px); }
+  .btn-ghost { background: var(--surface); color: var(--ink); border: 1px solid var(--line); }
+  .btn-ghost:hover { border-color: var(--accent); color: var(--accent); }
+
+  .hero-stats {
+    margin: 56px auto 0; display: grid; grid-template-columns: repeat(4, 1fr);
+    gap: 16px; max-width: 860px;
+  }
+  .stat {
+    background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius);
+    padding: 18px 8px;
+  }
+  .stat b { display: block; font-size: 1.55rem; color: var(--accent); }
+  .stat small { color: var(--ink-2); font-size: .82rem; }
+
+  /* ---------- 通用 Section ---------- */
+  section { max-width: 1080px; margin: 0 auto; padding: 72px 24px 0; }
+  section:last-of-type { padding-bottom: 90px; }
+  .kicker { color: var(--accent); font-weight: 700; font-size: .85rem; letter-spacing: 2px; }
+  h2 { font-size: 1.75rem; font-weight: 800; margin: 8px 0 10px; }
+  .section-desc { color: var(--ink-2); max-width: 680px; margin-bottom: 36px; }
+
+  .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; }
+  .grid-2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: 18px; }
+  @media (max-width: 860px) { .grid-3, .grid-2, .hero-stats { grid-template-columns: 1fr; } }
+
+  .card {
+    background: var(--surface); border: 1px solid var(--line);
+    border-radius: var(--radius); padding: 24px;
+    transition: transform .18s, box-shadow .18s;
+  }
+  .card:hover { transform: translateY(-3px); box-shadow: 0 10px 26px rgba(28,35,51,.08); }
+  .card .icon {
+    width: 42px; height: 42px; border-radius: 10px; display: flex;
+    align-items: center; justify-content: center; font-size: 1.25rem;
+    background: var(--accent-soft); margin-bottom: 14px;
+  }
+  .card h3 { font-size: 1.05rem; margin-bottom: 8px; }
+  .card p { color: var(--ink-2); font-size: .92rem; }
+
+  /* ---------- 工作流时间线 ---------- */
+  .flow { display: flex; flex-direction: column; gap: 0; position: relative; }
+  .flow-step {
+    display: flex; gap: 20px; position: relative; padding-bottom: 30px;
+  }
+  .flow-step:not(:last-child)::before {
+    content: ""; position: absolute; left: 21px; top: 46px; bottom: 0;
+    width: 2px; background: var(--line);
+  }
+  .flow-num {
+    flex: none; width: 44px; height: 44px; border-radius: 50%;
+    background: var(--accent); color: #fff; font-weight: 700;
+    display: flex; align-items: center; justify-content: center; font-size: 1.05rem;
+  }
+  .flow-body { padding-top: 6px; }
+  .flow-body h3 { font-size: 1.05rem; }
+  .flow-body p { color: var(--ink-2); font-size: .92rem; max-width: 640px; }
+  .flow-body .tip {
+    margin-top: 8px; display: inline-block; padding: 4px 12px; border-radius: 8px;
+    background: var(--accent-soft); color: var(--accent); font-size: .82rem;
+  }
+
+  /* ---------- 交互演示：提示词生成器 ---------- */
+  .demo {
+    background: var(--surface); border: 1px solid var(--line);
+    border-radius: var(--radius); padding: 28px;
+  }
+  .demo textarea {
+    width: 100%; min-height: 96px; border: 1px solid var(--line);
+    border-radius: 10px; padding: 14px; font-size: .95rem; resize: vertical;
+    font-family: inherit; outline: none;
+  }
+  .demo textarea:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(79,70,229,.12); }
+  .demo-row { display: flex; gap: 12px; margin-top: 14px; flex-wrap: wrap; align-items: center; }
+  .chips { display: flex; gap: 8px; flex-wrap: wrap; }
+  .chip {
+    padding: 6px 14px; border-radius: 999px; border: 1px solid var(--line);
+    background: var(--bg); font-size: .84rem; cursor: pointer; transition: all .15s;
+  }
+  .chip.on { background: var(--accent); border-color: var(--accent); color: #fff; }
+  .output {
+    margin-top: 18px; padding: 18px; border-radius: 10px;
+    background: #0f172a; color: #e2e8f0; font-family: Consolas, "Courier New", monospace;
+    font-size: .86rem; white-space: pre-wrap; min-height: 130px;
+  }
+  .output .dim { color: #64748b; }
+
+  /* ---------- 阶段路线 ---------- */
+  .phases { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; }
+  .phase { border-top: 4px solid var(--accent); }
+  .phase:nth-child(2) { border-top-color: var(--accent-2); }
+  .phase:nth-child(3) { border-top-color: var(--ok); }
+  .phase .tag { font-size: .8rem; color: var(--ink-2); letter-spacing: 1px; }
+  .phase ul { margin-top: 12px; padding-left: 18px; color: var(--ink-2); font-size: .9rem; }
+  .phase li { margin-bottom: 6px; }
+
+  /* ---------- 治理清单 ---------- */
+  .check-item {
+    display: flex; gap: 12px; align-items: flex-start;
+    padding: 14px 16px; border: 1px solid var(--line); border-radius: 10px;
+    margin-bottom: 10px; background: var(--surface); cursor: pointer;
+    transition: border-color .15s;
+  }
+  .check-item:hover { border-color: var(--accent); }
+  .checkbox {
+    flex: none; width: 22px; height: 22px; border-radius: 6px;
+    border: 2px solid var(--line); margin-top: 3px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: .8rem; color: #fff; transition: all .15s;
+  }
+  .check-item.done .checkbox { background: var(--ok); border-color: var(--ok); }
+  .check-item.done .txt { text-decoration: line-through; color: var(--ink-2); }
+  .check-item .txt b { display: block; font-size: .95rem; }
+  .check-item .txt span { color: var(--ink-2); font-size: .85rem; }
+  .progress-wrap { margin-bottom: 18px; display: flex; align-items: center; gap: 14px; }
+  .progress-bar { flex: 1; height: 8px; background: var(--line); border-radius: 999px; overflow: hidden; }
+  .progress-fill { height: 100%; width: 0%; background: var(--ok); border-radius: 999px; transition: width .3s; }
+
+  /* ---------- FAQ ---------- */
+  .faq-item { border: 1px solid var(--line); border-radius: 12px; background: var(--surface); margin-bottom: 12px; overflow: hidden; }
+  .faq-q {
+    width: 100%; text-align: left; padding: 16px 20px; border: none;
+    background: none; font-size: .98rem; font-weight: 600; cursor: pointer;
+    display: flex; justify-content: space-between; align-items: center; font-family: inherit;
+  }
+  .faq-q::after { content: "+"; font-size: 1.2rem; color: var(--accent); }
+  .faq-item.open .faq-q::after { content: "−"; }
+  .faq-a { max-height: 0; overflow: hidden; transition: max-height .3s ease; color: var(--ink-2); font-size: .9rem; }
+  .faq-item.open .faq-a { max-height: 300px; }
+  .faq-a div { padding: 0 20px 18px; }
+
+  footer {
+    text-align: center; padding: 40px 24px; color: var(--ink-2);
+    font-size: .85rem; border-top: 1px solid var(--line); margin-top: 72px;
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-inner">
+    <div class="logo">全员 <span>Vibe Coding</span></div>
+    <div class="nav-links">
+      <a href="#what">理念</a>
+      <a href="#flow">工作流</a>
+      <a href="#demo">互动演示</a>
+      <a href="#phases">落地路线</a>
+      <a href="#governance">风险治理</a>
+      <a href="#faq">FAQ</a>
+    </div>
+  </div>
+</nav>
+
+<header>
+  <div class="badge">AI 时代的软件开发新范式</div>
+  <h1>让每个人都能<em>编程</em></h1>
+  <p class="sub">
+    Vibe Coding（氛围编程）：用自然语言向 AI 描述你想要什么，由 AI 生成代码，
+    人负责提出意图、审查结果与把控方向。当这件事成为全员能力，软件生产方式将被重新定义。
+  </p>
+  <div class="hero-actions">
+    <button class="btn btn-primary" onclick="document.getElementById('demo').scrollIntoView({behavior:'smooth'})">试试互动演示</button>
+    <button class="btn btn-ghost" onclick="document.getElementById('flow').scrollIntoView({behavior:'smooth'})">了解工作流</button>
+  </div>
+  <div class="hero-stats">
+    <div class="stat"><b>10×</b><small>原型验证提速</small></div>
+    <div class="stat"><b>100%</b><small>全员可参与开发</small></div>
+    <div class="stat"><b>0</b><small>编程语法门槛起步</small></div>
+    <div class="stat"><b>N</b><small>个创意→产品的通道</small></div>
+  </div>
+</header>
+
+<!-- ================= 理念 ================= -->
+<section id="what">
+  <div class="kicker">CONCEPT</div>
+  <h2>什么是 Vibe Coding？</h2>
+  <p class="section-desc">
+    2025 年初由 Andrej Karpathy 提出：完全沉浸在"氛围"里，拥抱 AI 的指数级进化，
+    几乎忘记代码本身的存在——你只需要说清楚想要什么。
+  </p>
+  <div class="grid-3">
+    <div class="card">
+      <div class="icon">💬</div>
+      <h3>自然语言即接口</h3>
+      <p>需求描述取代语法记忆。"做一个能统计团队工时的小工具"就是一条合法的"开发指令"。</p>
+    </div>
+    <div class="card">
+      <div class="icon">⚡</div>
+      <h3>秒级反馈回路</h3>
+      <p>说 → 看 → 改，循环以秒计。传统"写码—编译—调试"的分钟级循环被大幅压缩。</p>
+    </div>
+    <div class="card">
+      <div class="icon">🧭</div>
+      <h3>人是方向盘，不是发动机</h3>
+      <p>AI 负责体力劳动（写代码），人负责判断力劳动（定方向、做取舍、把质量关）。</p>
+    </div>
+  </div>
+</section>
+
+<!-- ================= 工作流 ================= -->
+<section id="flow">
+  <div class="kicker">WORKFLOW</div>
+  <h2>四步工作流</h2>
+  <p class="section-desc">团队里每个成员——产品、运营、测试、研发——都可以按这套流程把想法变成可运行的系统。</p>
+  <div class="flow">
+    <div class="flow-step">
+      <div class="flow-num">1</div>
+      <div class="flow-body">
+        <h3>描述意图（Prompt）</h3>
+        <p>用结构化的方式说清楚：目标用户、核心功能、输入输出、约束条件。描述越清晰，生成质量越高。</p>
+        <span class="tip">提示词 = 角色 + 任务 + 约束 + 验收标准</span>
+      </div>
+    </div>
+    <div class="flow-step">
+      <div class="flow-num">2</div>
+      <div class="flow-body">
+        <h3>生成与预览（Generate）</h3>
+        <p>AI 工具生成代码并实时预览效果。先跑通主流程，不追求一次完美。</p>
+        <span class="tip">小步快跑：一次只让它做一件事</span>
+      </div>
+    </div>
+    <div class="flow-step">
+      <div class="flow-num">3</div>
+      <div class="flow-body">
+        <h3>审查与验证（Review）</h3>
+        <p>人工验收功能是否符合预期；关键代码交给研发做安全与质量审查；用测试用例兜底。</p>
+        <span class="tip">AI 生成的 ≠ 可以上线的</span>
+      </div>
+    </div>
+    <div class="flow-step">
+      <div class="flow-num">4</div>
+      <div class="flow-body">
+        <h3>迭代与沉淀（Iterate）</h3>
+        <p>把好用的提示词、踩过的坑沉淀成团队知识库，让下一次生成站在上一次的肩膀上。</p>
+        <span class="tip">提示词库是团队的新型资产</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= 互动演示 ================= -->
+<section id="demo">
+  <div class="kicker">LIVE DEMO</div>
+  <h2>提示词生成器</h2>
+  <p class="section-desc">这就是 Vibe Coding 的第一步：把模糊的想法变成结构化的提示词。选几个标签、写一句话，看看会发生什么。</p>
+  <div class="demo">
+    <textarea id="ideaInput" placeholder="用一句话写下你的想法，例如：我想做一个会议室预约小工具">我想做一个会议室预约小工具</textarea>
+    <div class="demo-row">
+      <div class="chips" id="chipGroup">
+        <span class="chip on" data-v="Web 网页版">Web 网页版</span>
+        <span class="chip" data-v="含数据看板">含数据看板</span>
+        <span class="chip" data-v="支持多人协作">支持多人协作</span>
+        <span class="chip" data-v="移动端优先">移动端优先</span>
+        <span class="chip" data-v="需要登录">需要登录</span>
+      </div>
+      <button class="btn btn-primary" style="margin-left:auto" onclick="genPrompt()">生成提示词 ✨</button>
+    </div>
+    <div class="output" id="promptOutput"><span class="dim">// 点击"生成提示词"，这里会输出一段可直接投喂给 AI 编程工具的结构化提示词</span></div>
+  </div>
+</section>
+
+<!-- ================= 落地路线 ================= -->
+<section id="phases">
+  <div class="kicker">ROADMAP</div>
+  <h2>全员落地的三个阶段</h2>
+  <p class="section-desc">从"个别人尝鲜"到"组织级能力"，建议按节奏推进，别一步登天。</p>
+  <div class="phases">
+    <div class="card phase">
+      <div class="tag">PHASE 1 · 1-2 个月</div>
+      <h3>试点尝鲜</h3>
+      <ul>
+        <li>选 1-2 个低风险场景（内部小工具、原型）</li>
+        <li>招募种子用户，建立第一个提示词库</li>
+        <li>明确"AI 生成代码"的审查底线</li>
+      </ul>
+    </div>
+    <div class="card phase">
+      <div class="tag">PHASE 2 · 3-6 个月</div>
+      <h3>推广复制</h3>
+      <ul>
+        <li>培训覆盖到产品 / 运营 / 测试等非研发角色</li>
+        <li>沉淀标准提示词模板与验收清单</li>
+        <li>建立内部案例分享机制（月度 Vibe Day）</li>
+      </ul>
+    </div>
+    <div class="card phase">
+      <div class="tag">PHASE 3 · 6 个月+</div>
+      <h3>组织能力</h3>
+      <ul>
+        <li>提示词资产纳入团队知识管理体系</li>
+        <li>绩效与激励认可"AI 协作产出"</li>
+        <li>安全、合规、质量门禁全面自动化</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- ================= 风险治理 ================= -->
+<section id="governance">
+  <div class="kicker">GOVERNANCE</div>
+  <h2>风险与治理清单</h2>
+  <p class="section-desc">Vibe Coding 不等于放弃质量。这份清单可以逐项勾选，作为团队上线的自检表。</p>
+  <div class="progress-wrap">
+    <span style="font-size:.9rem;color:var(--ink-2)">自检进度</span>
+    <div class="progress-bar"><div class="progress-fill" id="progFill"></div></div>
+    <b id="progText" style="font-size:.9rem">0 / 6</b>
+  </div>
+  <div id="checklist">
+    <div class="check-item" onclick="toggleCheck(this)">
+      <div class="checkbox">✓</div>
+      <div class="txt"><b>不把敏感数据投喂给外部 AI</b><span>密钥、客户数据、核心业务逻辑严禁进入提示词。</span></div>
+    </div>
+    <div class="check-item" onclick="toggleCheck(this)">
+      <div class="checkbox">✓</div>
+      <div class="txt"><b>AI 生成代码必须经过人工审查</b><span>至少一名研发 review 后才能合入主分支。</span></div>
+    </div>
+    <div class="check-item" onclick="toggleCheck(this)">
+      <div class="checkbox">✓</div>
+      <div class="txt"><b>关键路径必须有自动化测试</b><span>让测试兜住"看起来能跑"和"真的能跑"之间的差距。</span></div>
+    </div>
+    <div class="check-item" onclick="toggleCheck(this)">
+      <div class="checkbox">✓</div>
+      <div class="txt"><b>注意开源许可证合规</b><span>警惕生成代码与 GPL 等协议的传染性冲突。</span></div>
+    </div>
+    <div class="check-item" onclick="toggleCheck(this)">
+      <div class="checkbox">✓</div>
+      <div class="txt"><b>保留决策与人负责的记录</b><span>出了问题能追溯"谁批准的、AI 参与了哪部分"。</span></div>
+    </div>
+    <div class="check-item" onclick="toggleCheck(this)">
+      <div class="checkbox">✓</div>
+      <div class="txt"><b>警惕能力幻觉，保持基本功</b><span>AI 提效的同时，团队仍要能读懂、能接管自己系统的代码。</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= FAQ ================= -->
+<section id="faq">
+  <div class="kicker">FAQ</div>
+  <h2>常见问题</h2>
+  <div class="faq-item">
+    <button class="faq-q">不会写代码的人真的能做出可用系统吗？</button>
+    <div class="faq-a"><div>能做出原型和内部工具，这是 Vibe Coding 最大的价值之一。但涉及支付、数据安全、高并发的核心系统，仍需专业研发主导。合理的定位是：非研发人员负责"从 0 到 0.8"，研发负责"从 0.8 到 1.0"。</div></div>
+  </div>
+  <div class="faq-item">
+    <button class="faq-q">AI 生成的代码质量可靠吗？</button>
+    <div class="faq-a"><div>普遍水平在快速提升，但仍有幻觉、安全漏洞、过度拟合示例的风险。所以"生成"和"审查"必须成对出现——把 AI 当成一个写得飞快但需要 code review 的初级工程师来管理。</div></div>
+  </div>
+  <div class="faq-item">
+    <button class="faq-q">这会不会让程序员失业？</button>
+    <div class="faq-a"><div>被替代的是"打字翻译需求"的部分，不是"理解问题、设计系统、权衡取舍"的部分。历史经验是：工具越强，能驾驭工具的工程师价值越高。真正的分水岭在于是否拥抱协作方式的变化。</div></div>
+  </div>
+  <div class="faq-item">
+    <button class="faq-q">团队第一步该做什么？</button>
+    <div class="faq-a"><div>本周就可以开始：找一个内部小工具需求 → 用本页的提示词生成器写出结构化提示词 → 投喂给 AI 编程工具 → 两周内在月度分享会上演示成果。动起来比规划完美更重要。</div></div>
+  </div>
+</section>
+
+<footer>
+  全员 Vibe Coding · 展示系统 · Built with AI, reviewed by humans.<br>
+  2026 · 仅供学习与内部演示使用
+</footer>
+
+<script>
+  /* ---------- 芯片选择 ---------- */
+  document.querySelectorAll('#chipGroup .chip').forEach(chip => {
+    chip.addEventListener('click', () => chip.classList.toggle('on'));
+  });
+
+  /* ---------- 提示词生成 ---------- */
+  function genPrompt() {
+    const idea = document.getElementById('ideaInput').value.trim() || '（请先填写你的想法）';
+    const feats = [...document.querySelectorAll('#chipGroup .chip.on')].map(c => c.dataset.v);
+    const out = document.getElementById('promptOutput');
+    out.textContent =
+`# 角色
+你是一位资深全栈工程师，擅长快速交付高质量 Web 应用。
+
+# 任务
+${idea}
+
+# 功能形态
+- 形态：${feats.length ? feats.join('；') : '简洁的 Web 应用'}
+- 交互流畅，界面美观，符合现代设计规范
+
+# 约束
+- 优先使用成熟、轻量的技术栈
+- 代码结构清晰，附带必要注释
+- 不引入未经验证的第三方依赖
+
+# 验收标准
+1. 核心流程可以完整走通
+2. 空数据 / 异常输入有友好提示
+3. 输出可直接运行的完整代码
+
+请先复述你对需求的理解，确认无误后再开始生成。`;
+    out.animate([{opacity:.4},{opacity:1}], {duration:300});
+  }
+
+  /* ---------- 治理清单勾选 ---------- */
+  function toggleCheck(el) {
+    el.classList.toggle('done');
+    const total = document.querySelectorAll('.check-item').length;
+    const done = document.querySelectorAll('.check-item.done').length;
+    document.getElementById('progFill').style.width = (done/total*100) + '%';
+    document.getElementById('progText').textContent = done + ' / ' + total;
+  }
+
+  /* ---------- FAQ 折叠 ---------- */
+  document.querySelectorAll('.faq-q').forEach(btn => {
+    btn.addEventListener('click', () => btn.parentElement.classList.toggle('open'));
+  });
+</script>
+</body>
+</html>
